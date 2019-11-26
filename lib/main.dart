@@ -46,8 +46,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -74,12 +72,11 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body:  SafeArea (
-        child: ArCoreView(
-          onArCoreViewCreated: _onArCoreViewCreated,
-          enableTapRecognizer:  true,
-        )
-      ),
+      body: SafeArea(
+          child: ArCoreView(
+        onArCoreViewCreated: _onArCoreViewCreated,
+        enableTapRecognizer: true,
+      )),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
@@ -88,48 +85,39 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void  _onArCoreViewCreated(ArCoreController controller) {
+  void _onArCoreViewCreated(ArCoreController controller) {
     arCoreController = controller;
-    _addSphere(arCoreController);
+    //_addSphere(arCoreController);
     arCoreController.onPlaneTap = _handleOnPlaneTap;
   }
 
-  void _handleOnPlaneTap(List<ArCoreHitTestResult> hits){
+  void _handleOnPlaneTap(List<ArCoreHitTestResult> hits) {
     final hit = hits.first;
+    print(1);
     _addToucano(hit);
   }
-
-  void _addSphere(ArCoreController _arcoreController){
-    final material = ArCoreMaterial(color: Colors.deepOrange);
-    final sphere = ArCoreSphere(materials: [material], radius: 0.2);
-    final node = ArCoreNode(
-      shape: sphere,
-      position: vector.Vector3(0, 0, -1)
-    );
-    arCoreController.addArCoreNode(node);
-
-  }
+  
 
   void _addToucano(ArCoreHitTestResult plane) {
     final toucanNode = ArCoreReferenceNode(
         name: "Toucano",
-        objectUrl:"https://raw.githubusercontent.com/andytwoods/ar_play/master/assets/models/walkman.gltf",
+        objectUrl:
+            "https://raw.githubusercontent.com/andytwoods/ar_play/master/assets/models/walkman.gltf",
 
         //obcject3DFileName: 'models/walkman.gltf',
         position: plane.pose.translation,
-        rotation: plane.pose.rotation);
+        rotation: plane.pose.rotation,
+        scale: vector.Vector3(4, 4, 4));
+    print('added');
 
     arCoreController.addArCoreNodeWithAnchor(toucanNode);
   }
 
   @override
-  void dispose(){
+  void dispose() {
     arCoreController.dispose();
     super.dispose();
-
   }
-
 }
 
 ArCoreController arCoreController;
-
