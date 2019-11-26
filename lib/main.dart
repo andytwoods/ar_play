@@ -107,19 +107,19 @@ class _MyHomePageState extends State<MyHomePage> {
       position: vector.Vector3(0, 0, -1)
     );
     arCoreController.addArCoreNode(node);
+
   }
 
   void _addToucano(ArCoreHitTestResult plane) {
-    if (objectSelected != null) {
-      //"https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/Duck/glTF/Duck.gltf"
-      final toucanoNode = ArCoreReferenceNode(
-          name: objectSelected,
-          obcject3DFileName: objectSelected,
-          position: plane.pose.translation,
-          rotation: plane.pose.rotation);
+    final toucanNode = ArCoreReferenceNode(
+        name: "Toucano",
+        objectUrl:"https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/Duck/glTF/Duck.gltf",
 
-      arCoreController.addArCoreNodeWithAnchor(toucanoNode);
-    }
+        //obcject3DFileName: 'models/walkman.gltf',
+        position: plane.pose.translation,
+        rotation: plane.pose.rotation);
+
+    arCoreController.addArCoreNodeWithAnchor(toucanNode);
   }
 
   @override
