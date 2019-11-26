@@ -113,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _addToucano(ArCoreHitTestResult plane) {
     final toucanNode = ArCoreReferenceNode(
         name: "Toucano",
-        objectUrl:"https://github.com/KhronosGroup/glTF-Sample-Models/raw/master/2.0/Duck/glTF/Duck.gltf",
+        objectUrl:"https://raw.githubusercontent.com/andytwoods/ar_play/master/assets/models/walkman.gltf",
 
         //obcject3DFileName: 'models/walkman.gltf',
         position: plane.pose.translation,
