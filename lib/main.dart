@@ -1,15 +1,35 @@
 import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
-void main() => runApp(MyApp());
+import 'home.dart';
+
+List<CameraDescription> cameras;
+
+class SelectedNotification extends Notification {
+  final String item;
+
+  const SelectedNotification({this.item});
+}
+
+Future<Null> main() async {
+  try {
+    cameras = await availableCameras();
+  } on CameraException catch (e) {
+    print('Error: $e.code\nError Message: $e.message');
+  }
+  runApp(new MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+  final title = 'Andy CV AR Bodgy McBodgeFace';
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: title,
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -22,7 +42,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: title),
     );
   }
 }
@@ -40,19 +60,20 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
+  ArCoreController arCoreController;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _incrementCounter() {
+  bool isAr = false;
+  String item_to_model;
+
+  void _incrementCounter(item) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
+      isAr = true;
+      item_to_model = item;
     });
   }
 
@@ -66,58 +87,86 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: SafeArea(
-          child: ArCoreView(
-        onArCoreViewCreated: _onArCoreViewCreated,
-        enableTapRecognizer: true,
-      )),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: NotificationListener<SelectedNotification>(
+        onNotification: (SelectedNotification notification) {
+          print(notification.item);
+          showDialog(
+            context: context,
+            builder: (BuildContext context)
+          {
+            // return object of type Dialog
+            return AlertDialog(
+              title: new Text("selected: "+ notification.item),
+              content: new Text("pick action"),
+              actions: <Widget>[
+                // usually buttons at the bottom of the dialog
+                new FlatButton(
+                  child: new Text("AR"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _incrementCounter(notification.item);
+                  },
+                ),
+                new FlatButton(
+                  child: new Text("Continue"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+
+          return true;
+        },
+        child: SafeArea(
+            child: isAr == true
+                ? ArCoreView(
+                    onArCoreViewCreated: _onArCoreViewCreated,
+                    enableTapRecognizer: true,
+                  )
+                : HomePage(cameras)),
+      ),
+
     );
   }
 
   void _onArCoreViewCreated(ArCoreController controller) {
-    arCoreController = controller;
-    //_addSphere(arCoreController);
-    arCoreController.onPlaneTap = _handleOnPlaneTap;
+    widget.arCoreController = controller;
+    widget.arCoreController.onPlaneTap = _handleOnPlaneTap;
   }
 
   void _handleOnPlaneTap(List<ArCoreHitTestResult> hits) {
     final hit = hits.first;
-    print(1);
-    _addToucano(hit);
+    _add3dModel(hit);
   }
-  
 
-  void _addToucano(ArCoreHitTestResult plane) {
+  void _add3dModel(ArCoreHitTestResult plane) {
     final toucanNode = ArCoreReferenceNode(
         name: "Toucano",
-        objectUrl:
-            "https://raw.githubusercontent.com/andytwoods/ar_play/master/assets/models/walkman.gltf",
+        objectUrl: item_to_model == 'cup'
+            ? "https://raw.githubusercontent.com/andytwoods/ar_play/master/assets/models/walkman.gltf"
+            : "https://raw.githubusercontent.com/andytwoods/ar_play/master/sampledata/Laptop_out/Laptop.gltf",
 
         //obcject3DFileName: 'models/walkman.gltf',
         position: plane.pose.translation,
         rotation: plane.pose.rotation,
-        scale: vector.Vector3(4, 4, 4));
+        scale: vector.Vector3(14, 14, 14));
     print('added');
 
-    arCoreController.addArCoreNodeWithAnchor(toucanNode);
+    widget.arCoreController.addArCoreNodeWithAnchor(toucanNode);
   }
 
   @override
   void dispose() {
-    arCoreController.dispose();
+    widget.arCoreController.dispose();
     super.dispose();
   }
 }
-
-ArCoreController arCoreController;
