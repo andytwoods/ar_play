@@ -10,7 +10,10 @@ class BndBox extends StatelessWidget {
   final double screenH;
   final double screenW;
   final String model;
-  final List<String> items = ['cup', 'keyboard', ];
+  final List<String> items = [
+    'cup',
+    'keyboard',
+  ];
 
   BndBox(this.results, this.previewH, this.previewW, this.screenH, this.screenW,
       this.model);
@@ -18,7 +21,9 @@ class BndBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> _renderBoxes() {
-      return results.map((re) {
+      return results.where((re){
+        return items.contains(re["detectedClass"]);
+      }).map((re) {
         var _x = re["rect"]["x"];
         var _w = re["rect"]["w"];
         var _y = re["rect"]["y"];
@@ -27,26 +32,24 @@ class BndBox extends StatelessWidget {
 
         var selected = re["detectedClass"];
 
-        if (items.contains(selected) == false) {
-          if (screenH / screenW > previewH / previewW) {
-            scaleW = screenH / previewH * previewW;
-            scaleH = screenH;
-            var difW = (scaleW - screenW) / scaleW;
-            x = (_x - difW / 2) * scaleW;
-            w = _w * scaleW;
-            if (_x < difW / 2) w -= (difW / 2 - _x) * scaleW;
-            y = _y * scaleH;
-            h = _h * scaleH;
-          } else {
-            scaleH = screenW / previewW * previewH;
-            scaleW = screenW;
-            var difH = (scaleH - screenH) / scaleH;
-            x = _x * scaleW;
-            w = _w * scaleW;
-            y = (_y - difH / 2) * scaleH;
-            h = _h * scaleH;
-            if (_y < difH / 2) h -= (difH / 2 - _y) * scaleH;
-          }
+        if (screenH / screenW > previewH / previewW) {
+          scaleW = screenH / previewH * previewW;
+          scaleH = screenH;
+          var difW = (scaleW - screenW) / scaleW;
+          x = (_x - difW / 2) * scaleW;
+          w = _w * scaleW;
+          if (_x < difW / 2) w -= (difW / 2 - _x) * scaleW;
+          y = _y * scaleH;
+          h = _h * scaleH;
+        } else {
+          scaleH = screenW / previewW * previewH;
+          scaleW = screenW;
+          var difH = (scaleH - screenH) / scaleH;
+          x = _x * scaleW;
+          w = _w * scaleW;
+          y = (_y - difH / 2) * scaleH;
+          h = _h * scaleH;
+          if (_y < difH / 2) h -= (difH / 2 - _y) * scaleH;
         }
 
         return Positioned(
@@ -55,7 +58,7 @@ class BndBox extends StatelessWidget {
           width: w,
           height: h,
           child: GestureDetector(
-            onTap:(){
+            onTap: () {
               SelectedNotification(item: selected)..dispatch(context);
             },
             child: Container(

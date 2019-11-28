@@ -70,10 +70,17 @@ class _MyHomePageState extends State<MyHomePage> {
   bool isAr = false;
   String item_to_model;
 
-  void _incrementCounter(item) {
+  void _incrementCounter(String item) {
     setState(() {
-      isAr = true;
-      item_to_model = item;
+
+
+      if (item == 'cup')
+        item = 'keyboard';
+      else if (item == 'keyboard') item = 'cup';
+      if (item.length > 0) {
+        item_to_model = item;
+        isAr = true;
+      }
     });
   }
 
@@ -94,35 +101,41 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _incrementCounter('');
+        },
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
+      ), // Th
       body: NotificationListener<SelectedNotification>(
         onNotification: (SelectedNotification notification) {
           print(notification.item);
           showDialog(
-            context: context,
-            builder: (BuildContext context)
-          {
-            // return object of type Dialog
-            return AlertDialog(
-              title: new Text("selected: "+ notification.item),
-              content: new Text("pick action"),
-              actions: <Widget>[
-                // usually buttons at the bottom of the dialog
-                new FlatButton(
-                  child: new Text("AR"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _incrementCounter(notification.item);
-                  },
-                ),
-                new FlatButton(
-                  child: new Text("Continue"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          });
+              context: context,
+              builder: (BuildContext context) {
+                // return object of type Dialog
+                return AlertDialog(
+                  title: new Text("selected: " + notification.item),
+                  content: new Text("pick action"),
+                  actions: <Widget>[
+                    // usually buttons at the bottom of the dialog
+                    new FlatButton(
+                      child: new Text("AR"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _incrementCounter(notification.item);
+                      },
+                    ),
+                    new FlatButton(
+                      child: new Text("Continue"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              });
 
           return true;
         },
@@ -134,7 +147,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   )
                 : HomePage(cameras)),
       ),
-
     );
   }
 
